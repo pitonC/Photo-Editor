@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} · Editor{% endblock %}
+
+{% block content %}
+<div class="container-wide pb-16" data-project-id="{{ project.id }}" id="editor-shell">
+  <div class="flex flex-wrap items-center justify-between gap-4 py-6">
+    <div class="flex items-center gap-3">
+      <a href="{{ url_for('main.index') }}" class="btn btn-ghost px-3 py-2 text-xs">
+        <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Studio
+      </a>
+      <div>
+        <div class="text-xs uppercase tracking-widest text-[var(--color-fg-dim)]">Project</div>
+        <div class="text-lg">{{ project.name }}</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="btn btn-ghost" data-action="undo" title="Cmd/Ctrl+Z">
+        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg>
+        Undo <span class="font-mono text-[10px] text-[var(--color-fg-dim)]" data-history="undo">0</span>
+      </button>
+      <button class="btn btn-ghost" data-action="redo" title="Cmd/Ctrl+Shift+Z">
+        Redo
+        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h4"/></svg>
+        <span class="font-mono text-[10px] text-[var(--color-fg-dim)]" data-history="redo">0</span>
+      </button>
+      <a href="{{ url_for('api.project_render', project_id=project.id) }}" download="{{ project.name }}.png" class="btn btn-primary">
+        Exportar PNG
+        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-12 gap-5">
+    <!-- LEFT PANEL: ADD SHAPES + LAYERS -->
+    <aside class="col-span-12 md:col-span-3">
+      <div class="surface p-5">
+        <span class="pill">★ Prototype</span>
+        <h3 class="mt-3 text-lg">Añade formas</h3>
+        <p class="mt-1 text-xs text-[var(--color-fg-mute)]">Click para añadir. Cada forma es una capa clonable.</p>
+        <div class="mt-4 grid grid-cols-4 gap-2" id="shape-palette">
+          {% for shape in [
+            ('rect','Cuadrado'),
+            ('circle','Círculo'),
+            ('triangle','Triángulo'),
+            ('star','Estrella')
+          ] %}
+          <button class="surface-hi flex aspect-square flex-col items-center justify-center gap-1 text-[10px] text-[var(--color-fg-mute)] hover:text-[var(--color-fg)]"
+                  data-shape="{{ shape[0] }}" title="{{ shape[1] }}">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
+              {% if shape[0] == 'rect' %}<rect x="4" y="4" width="16" height="16" rx="3"/>
+              {% elif shape[0] == 'circle' %}<circle cx="12" cy="12" r="8"/>
+              {% elif shape[0] == 'triangle' %}<polygon points="12,4 20,20 4,20"/>
+              {% elif shape[0] == 'star' %}<polygon points="12,3 14.5,9 21,9.5 16,14 17.5,21 12,17 6.5,21 8,14 3,9.5 9.5,9"/>
+              {% endif %}
+            </svg>
+            <span>{{ shape[1] }}</span>
+          </button>
+          {% endfor %}
+        </div>
+
+        <div class="mt-4 flex items-center justify-between">
+          <span class="text-[10px] uppercase tracking-widest text-[var(--color-fg-dim)]">Color</span>
+          <input type="color" id="shape-color" value="#b8ff5c" class="h-7 w-12 cursor-pointer rounded-md border border-[var(--color-border)] bg-transparent"/>
+        </div>
+      </div>
+
+      <div class="surface mt-5 p-5">
+        <div class="flex items-center justify-between">
+          <span class="pill">★ Layers</span>
+          <span class="font-mono text-[10px] text-[var(--color-fg-dim)]" id="layer-count">0</span>
+        </div>
+        <ul class="mt-4 space-y-2" id="layers-list"></ul>
+      </div>
+    </aside>
+
+    <!-- CANVAS -->
+    <section class="col-span-12 md:col-span-6">
+      <div class="surface relative overflow-hidden p-3">
+        <div class="absolute inset-x-3 top-3 z-10 flex items-center justify-between">
+          <span class="pill">★ Live preview</span>
+          <span class="font-mono text-[10px] text-[var(--color-fg-dim)]" id="canvas-meta">{{ project.width }}×{{ project.height }}</span>
+        </div>
+        <div class="relative grid min-h-[70vh] place-items-center rounded-2xl bg-black/40 p-3 pt-12">
+          <div class="relative inline-block" id="preview-wrap">
+            <img id="preview" draggable="false"
+                 src="{{ url_for('api.project_render', project_id=project.id) }}?_v=0" alt="preview"
+                 class="block max-h-[85vh] max-w-full w-auto select-none rounded-xl shadow-[0_30px_120px_-20px_rgba(0,0,0,0.6)]"
+                 style="touch-action: none;"/>
+            <div id="overlay" class="pointer-events-none absolute inset-0"></div>
+            <div class="pointer-events-none absolute inset-0 hidden items-center justify-center bg-black/40 text-xs uppercase tracking-widest text-[var(--color-fg)] backdrop-blur-sm" id="rendering">
+              <span class="surface-hi px-3 py-1.5">Renderizando...</span>
+            </div>
+          </div>
+        </div>
+        <p class="mt-2 px-2 text-center text-[11px] text-[var(--color-fg-dim)]">
+          Click sobre una forma para seleccionarla · arrastra para moverla
+        </p>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: FILTERS (DECORATOR) -->
+    <aside class="col-span-12 md:col-span-3">
+      <div class="surface p-5">
+        <span class="pill">★ Decorator</span>
+        <h3 class="mt-3 text-lg">Filtros · sliders</h3>
+        <p class="mt-1 text-xs text-[var(--color-fg-mute)]">Cada slider añade un decorator a la imagen base.</p>
+
+        <div class="mt-5 space-y-5" id="filters-panel">
+          {% for f in [
+            {'name':'brightness','label':'Brillo','min':0.2,'max':2.0,'step':0.01,'default':1.0,'fmt':'×'},
+            {'name':'contrast','label':'Contraste','min':0.2,'max':2.0,'step':0.01,'default':1.0,'fmt':'×'},
+            {'name':'saturation','label':'Saturación','min':0,'max':2.0,'step':0.01,'default':1.0,'fmt':'×'},
+            {'name':'sharpness','label':'Nitidez','min':0,'max':3.0,'step':0.01,'default':1.0,'fmt':'×'},
+            {'name':'blur','label':'Desenfoque','min':0,'max':12,'step':0.1,'default':0,'fmt':'px'},
+            {'name':'sepia','label':'Sepia','min':0,'max':1,'step':0.01,'default':0,'fmt':'%'},
+            {'name':'grayscale','label':'B / N','min':0,'max':1,'step':0.01,'default':0,'fmt':'%'}
+          ] %}
+          <div class="filter-row" data-filter="{{ f.name }}" data-default="{{ f.default }}" data-fmt="{{ f.fmt }}">
+            <div class="mb-2 flex items-center justify-between">
+              <label class="text-xs uppercase tracking-widest text-[var(--color-fg-mute)]">{{ f.label }}</label>
+              <span class="font-mono text-xs text-[var(--color-fg)]" data-readout>{{ f.default }}{{ f.fmt }}</span>
+            </div>
+            <input type="range" min="{{ f.min }}" max="{{ f.max }}" step="{{ f.step }}" value="{{ f.default }}" class="slider"/>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="surface mt-5 p-5">
+        <span class="pill">★ Shortcuts</span>
+        <ul class="mt-3 space-y-2 text-xs text-[var(--color-fg-mute)]">
+          <li class="flex items-center justify-between"><span>Undo</span><kbd class="surface-hi px-1.5 py-0.5">⌘Z</kbd></li>
+          <li class="flex items-center justify-between"><span>Redo</span><kbd class="surface-hi px-1.5 py-0.5">⌘⇧Z</kbd></li>
+          <li class="flex items-center justify-between"><span>Duplicar capa</span><kbd class="surface-hi px-1.5 py-0.5">⌘D</kbd></li>
+          <li class="flex items-center justify-between"><span>Eliminar capa</span><kbd class="surface-hi px-1.5 py-0.5">⌫</kbd></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<template id="layer-row-template">
+  <li class="surface-hi flex items-center gap-3 px-3 py-2.5">
+    <div class="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-fg-mute)]" data-thumb></div>
+    <div class="min-w-0 flex-1">
+      <div class="truncate text-xs text-[var(--color-fg)]" data-name>—</div>
+      <div class="truncate text-[10px] text-[var(--color-fg-dim)]" data-sub>—</div>
+    </div>
+    <button class="text-[var(--color-fg-mute)] hover:text-[var(--color-accent)]" data-action="select" title="Seleccionar">
+      <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg>
+    </button>
+    <button class="text-[var(--color-fg-mute)] hover:text-[var(--color-accent)]" data-action="clone" title="Clonar (Prototype)">
+      <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+    </button>
+    <button class="text-[var(--color-fg-mute)] hover:text-rose-300" data-action="delete" title="Eliminar">
+      <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+    </button>
+  </li>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/editor.js') }}" type="module"></script>
+{% endblock %}

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Photo Editor — Studio futurista{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+</head>
+<body class="min-h-screen">
+  <div class="pointer-events-none fixed inset-0 -z-10">
+    <div class="glow-orb" style="width: 480px; height: 480px; background: #b8ff5c; top: -120px; left: -100px;"></div>
+    <div class="glow-orb" style="width: 520px; height: 520px; background: #7c3aed; bottom: -160px; right: -120px;"></div>
+    <div class="absolute inset-0 grid-pattern opacity-30"></div>
+  </div>
+
+  <header class="container-narrow flex items-center justify-between py-6">
+    <a href="{{ url_for('main.index') }}" class="flex items-center gap-3">
+      <span class="grid h-9 w-9 place-items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>
+        </svg>
+      </span>
+      <span class="font-display text-sm tracking-[0.32em] uppercase text-[var(--color-fg-mute)]">Photo · Forge</span>
+    </a>
+    <nav class="hidden items-center gap-7 text-sm text-[var(--color-fg-mute)] md:flex">
+      <a href="{{ url_for('main.index') }}" class="hover:text-[var(--color-fg)]">Studio</a>
+      <a href="#patterns" class="hover:text-[var(--color-fg)]">Patrones</a>
+      <a href="#how" class="hover:text-[var(--color-fg)]">Cómo funciona</a>
+    </nav>
+    <a href="#upload" class="btn btn-primary">Nuevo proyecto
+      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container-narrow mb-4 space-y-2">
+        {% for category, message in messages %}
+          <div class="surface px-4 py-3 text-sm {{ 'text-rose-300 border-rose-500/30' if category == 'error' else 'text-[var(--color-accent)]' }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="container-narrow mt-24 border-t border-[var(--color-border-soft)] py-10 text-xs text-[var(--color-fg-dim)]">
+    <div class="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+      <p>Photo Forge · construido con Flask · SQLAlchemy · Tailwind v4</p>
+      <p class="font-mono">Prototype · Decorator · Command · MVC</p>
+    </div>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

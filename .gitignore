@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# Flask
+instance/
+.webassets-cache
+
+# Node
+node_modules/
+
+# Tailwind build
+app/static/css/tailwind.css
+
+# DB
+*.sqlite3
+*.db
+
+# Uploads
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+.DS_Store

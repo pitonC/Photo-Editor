@@ -1,0 +1,14 @@
+{
+  "name": "photo-editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Editor de fotograf\u00eda web en Flask con patrones de dise\u00f1o.",
+  "scripts": {
+    "build:css": "tailwindcss -i ./app/static/css/input.css -o ./app/static/css/tailwind.css --minify",
+    "dev:css": "tailwindcss -i ./app/static/css/input.css -o ./app/static/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  }
+}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="container-narrow pt-12 pb-20">
+  <div class="flex items-center gap-3">
+    <span class="pill"><span class="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]"></span> Studio · v0.1</span>
+    <span class="text-xs text-[var(--color-fg-dim)]">Flask · SQLite · Tailwind v4 CLI</span>
+  </div>
+
+  <div class="mt-8 grid grid-cols-1 gap-12 md:grid-cols-12">
+    <div class="md:col-span-7">
+      <h1 class="text-5xl leading-[1.02] tracking-tight md:text-7xl">
+        Edita tus<br/>
+        <span class="text-[var(--color-fg-mute)]">fotos como en</span><br/>
+        <span class="relative inline-block">
+          un <span class="italic">estudio</span> futurista
+          <svg class="absolute -bottom-2 left-0 w-full" height="14" viewBox="0 0 300 14" fill="none">
+            <path d="M2 10 Q 80 -2, 150 7 T 298 6" stroke="#b8ff5c" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </span>.
+      </h1>
+      <p class="mt-6 max-w-xl text-base text-[var(--color-fg-mute)]">
+        Sube una foto, aplica filtros encadenables, añade formas, clónalas con un click
+        y deshaz cualquier paso con <kbd class="surface-hi px-1.5 py-0.5 text-xs">⌘Z</kbd>.
+        Todo construido en Flask con cuatro patrones de diseño clásicos.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <a href="#upload" class="btn btn-primary">Empezar a editar
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#patterns" class="btn btn-ghost">Ver patrones implementados</a>
+      </div>
+    </div>
+
+    <div class="md:col-span-5">
+      <div class="glass-card relative overflow-hidden p-6">
+        <div class="absolute -right-12 -top-16 h-48 w-48 rounded-full bg-[var(--color-violet)] opacity-25 blur-3xl"></div>
+        <div class="flex items-center justify-between">
+          <span class="pill">Live preview</span>
+          <span class="font-mono text-[10px] tracking-widest text-[var(--color-fg-dim)]">RAW · 6048×4032</span>
+        </div>
+        <div class="mt-5 aspect-[4/3] rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-zinc-800 via-zinc-900 to-black p-1">
+          <div class="grid h-full w-full place-items-center rounded-xl bg-[url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center">
+            <div class="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-white/80 backdrop-blur">aperture · f/1.8</div>
+          </div>
+        </div>
+        <div class="mt-5 grid grid-cols-3 gap-3 text-xs text-[var(--color-fg-mute)]">
+          <div class="surface-hi px-3 py-2"><div class="text-[10px] uppercase tracking-widest text-[var(--color-fg-dim)]">Exposure</div><div class="mt-1 text-sm text-[var(--color-fg)]">+0.6 EV</div></div>
+          <div class="surface-hi px-3 py-2"><div class="text-[10px] uppercase tracking-widest text-[var(--color-fg-dim)]">Sepia</div><div class="mt-1 text-sm text-[var(--color-fg)]">42%</div></div>
+          <div class="surface-hi px-3 py-2"><div class="text-[10px] uppercase tracking-widest text-[var(--color-fg-dim)]">Layers</div><div class="mt-1 text-sm text-[var(--color-fg)]">3</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="upload" class="container-narrow pb-20">
+  <div class="surface relative overflow-hidden p-8 md:p-12">
+    <div class="absolute -left-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-[var(--color-accent)] opacity-10 blur-3xl"></div>
+    <div class="grid grid-cols-1 gap-10 md:grid-cols-12">
+      <div class="md:col-span-5">
+        <span class="pill">★ Start</span>
+        <h2 class="mt-4 text-3xl md:text-4xl">Sube una foto<br/>y entra al lab</h2>
+        <p class="mt-3 text-sm text-[var(--color-fg-mute)]">Aceptamos PNG, JPG, JPEG, WEBP y BMP hasta 16MB. Re-escalamos automáticamente si supera 1600px.</p>
+      </div>
+      <form action="{{ url_for('main.create_project') }}" method="post" enctype="multipart/form-data" class="md:col-span-7">
+        <label class="block">
+          <span class="text-xs uppercase tracking-widest text-[var(--color-fg-dim)]">Nombre del proyecto</span>
+          <input name="name" type="text" placeholder="Edición nocturna · Tokio"
+                 class="mt-2 w-full rounded-2xl border border-[var(--color-border-soft)] bg-[var(--color-canvas-soft)] px-4 py-3 text-sm placeholder:text-[var(--color-fg-dim)] focus:border-[var(--color-accent)] focus:outline-none"/>
+        </label>
+        <label class="mt-5 flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-[var(--color-border)] bg-[var(--color-canvas-soft)] px-6 py-10 text-center transition hover:border-[var(--color-accent)]">
+          <svg viewBox="0 0 24 24" class="h-7 w-7 text-[var(--color-fg-mute)]" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 16V4M5 11l7-7 7 7"/><path d="M5 20h14"/>
+          </svg>
+          <div>
+            <div class="text-sm text-[var(--color-fg)]">Arrastra o haz click para subir</div>
+            <div class="text-xs text-[var(--color-fg-dim)]">PNG · JPG · WEBP · BMP</div>
+          </div>
+          <input name="image" type="file" accept="image/*" required class="hidden">
+        </label>
+        <button class="btn btn-primary mt-5 w-full">Crear proyecto y abrir editor</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="container-narrow pb-20">
+  <div class="mb-8 flex items-end justify-between">
+    <div>
+      <span class="pill">★ Library</span>
+      <h2 class="mt-3 text-3xl md:text-4xl">Tus proyectos recientes</h2>
+    </div>
+    <span class="text-xs uppercase tracking-widest text-[var(--color-fg-dim)]">{{ projects|length }} proyectos</span>
+  </div>
+
+  {% if projects %}
+  <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+    {% for project in projects %}
+    <div class="surface group relative overflow-hidden">
+      <a href="{{ url_for('main.editor', project_id=project.id) }}" class="block">
+        <div class="aspect-[4/3] overflow-hidden border-b border-[var(--color-border-soft)]">
+          <img src="{{ url_for('api.project_render', project_id=project.id) }}" alt="{{ project.name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+        </div>
+        <div class="flex items-center justify-between px-5 py-4">
+          <div>
+            <div class="text-sm font-medium">{{ project.name }}</div>
+            <div class="text-xs text-[var(--color-fg-dim)]">{{ project.layers|length }} capas · {{ project.width }}×{{ project.height }}</div>
+          </div>
+          <span class="text-xs text-[var(--color-fg-mute)] opacity-0 transition group-hover:opacity-100">Abrir →</span>
+        </div>
+      </a>
+      <form action="{{ url_for('main.delete_project', project_id=project.id) }}" method="post"
+            class="absolute right-3 top-3 opacity-0 transition group-hover:opacity-100"
+            onsubmit="return confirm('¿Eliminar este proyecto?');">
+        <button class="grid h-8 w-8 place-items-center rounded-full border border-[var(--color-border)] bg-black/40 text-[var(--color-fg-mute)] backdrop-blur hover:text-rose-300" title="Eliminar">
+          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="surface flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+    <div class="grid h-12 w-12 place-items-center rounded-full border border-[var(--color-border)]">
+      <svg viewBox="0 0 24 24" class="h-5 w-5 text-[var(--color-fg-mute)]" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+    </div>
+    <h3 class="text-xl">Aún no hay proyectos</h3>
+    <p class="max-w-md text-sm text-[var(--color-fg-mute)]">Sube tu primera foto arriba para crear el primer proyecto del studio.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section id="patterns" class="container-narrow pb-20">
+  <div class="mb-10">
+    <span class="pill">★ Patterns</span>
+    <h2 class="mt-3 text-3xl md:text-4xl">Cuatro patrones, una sola app</h2>
+    <p class="mt-3 max-w-2xl text-sm text-[var(--color-fg-mute)]">El editor usa los cuatro patrones del diagrama UML que diste. Aquí te decimos dónde vive cada uno en el código.</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+    <div class="surface p-6">
+      <div class="flex items-center justify-between">
+        <span class="pill">01 / MVC · MTV</span>
+        <span class="font-mono text-[10px] text-[var(--color-fg-dim)]">app/__init__.py</span>
+      </div>
+      <h3 class="mt-4 text-2xl">Model · Template · View</h3>
+      <p class="mt-2 text-sm text-[var(--color-fg-mute)]">Flask separa de forma natural: <code class="text-[var(--color-accent)]">models.py</code> es el Model, los templates son la Template, y los blueprints son el Controller/View.</p>
+    </div>
+
+    <div class="surface p-6">
+      <div class="flex items-center justify-between">
+        <span class="pill">02 · Command</span>
+        <span class="font-mono text-[10px] text-[var(--color-fg-dim)]">patterns/command.py</span>
+      </div>
+      <h3 class="mt-4 text-2xl">Undo / Redo con historia</h3>
+      <p class="mt-2 text-sm text-[var(--color-fg-mute)]">Cada acción (añadir forma, clonar capa, mover slider) es un <code class="text-[var(--color-accent)]">Command</code> con <code>execute()</code> y <code>undo()</code>. Se persiste en SQLite, así que el historial sobrevive recargas.</p>
+    </div>
+
+    <div class="surface p-6">
+      <div class="flex items-center justify-between">
+        <span class="pill">03 · Decorator</span>
+        <span class="font-mono text-[10px] text-[var(--color-fg-dim)]">patterns/decorator.py</span>
+      </div>
+      <h3 class="mt-4 text-2xl">Filtros encadenables</h3>
+      <p class="mt-2 text-sm text-[var(--color-fg-mute)]">Cada slider (brillo, contraste, saturación, blur, sepia, b/n…) es un <code class="text-[var(--color-accent)]">FilterDecorator</code> que envuelve a otro componente. Pillow se encarga del píxel.</p>
+    </div>
+
+    <div class="surface p-6">
+      <div class="flex items-center justify-between">
+        <span class="pill">04 · Prototype</span>
+        <span class="font-mono text-[10px] text-[var(--color-fg-dim)]">patterns/prototype.py</span>
+      </div>
+      <h3 class="mt-4 text-2xl">Clonar formas con un click</h3>
+      <p class="mt-2 text-sm text-[var(--color-fg-mute)]">Las capas implementan <code class="text-[var(--color-accent)]">clone()</code> con <code>copy.deepcopy</code> + un pequeño offset, así puedes duplicar formas (o capas) sin saber qué tipo concreto son.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="container-narrow pb-24">
+  <div class="surface relative overflow-hidden p-10 md:p-14">
+    <div class="absolute -right-16 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-[var(--color-rose)] opacity-15 blur-3xl"></div>
+    <span class="pill">★ How it works</span>
+    <h2 class="mt-3 text-3xl md:text-4xl">Cuatro pasos. Cero fricción.</h2>
+    <div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-4">
+      {% for step in [
+        ('01','Sube tu imagen','PNG/JPG/WEBP/BMP. La reescalamos si es enorme.'),
+        ('02','Aplica filtros','Sliders en vivo. Cada filtro es un decorator.'),
+        ('03','Añade formas','Y clónalas con prototype. Insta-style.'),
+        ('04','Deshaz cualquier paso','Cmd/Ctrl+Z. Cmd/Ctrl+Shift+Z para rehacer.')
+      ] %}
+      <div>
+        <div class="font-mono text-xs text-[var(--color-accent)]">{{ step[0] }}</div>
+        <div class="mt-2 text-lg">{{ step[1] }}</div>
+        <p class="mt-1 text-xs text-[var(--color-fg-mute)]">{{ step[2] }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
