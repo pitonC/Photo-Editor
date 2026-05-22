@@ -53,6 +53,9 @@ python run.py
 | Eliminar capa | `Backspace` / `Delete` |
 
 ## Estructura
+<img width="8191" height="7852" alt="User Action Command Pipeline-2026-05-22-202503" src="https://github.com/user-attachments/assets/85c4b3a9-20d7-46bb-bd8a-fac948752e3c" />
+
+<img width="8192" height="2982" alt="Command Execution Framework-2026-05-22-201832" src="https://github.com/user-attachments/assets/4c35f4eb-4268-4b21-b3ae-0f3da0410778" />
 
 ```
 photo-editor/
